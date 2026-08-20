@@ -1,0 +1,14 @@
+{
+  "title": "ARSA REALESTATE - Luxury Real Estate",
+  "description": "Discover the world's finest residential properties with ARSA REALESTATE. Expert luxury real estate advisory and private placement.",
+  "language": "en",
+  "robots": {
+    "index": true
+  },
+  "icons": {
+    "icon": "/favicon.ico"
+  },
+  "openGraph": {
+    "image": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&h=630&fit=crop&auto=format"
+  }
+}

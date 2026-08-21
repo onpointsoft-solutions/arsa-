@@ -46,10 +46,12 @@ const ALLOWED_ORIGINS = [
 app.use(
   cors({
     origin: (origin, cb) => {
-      // Allow server-to-server (no origin) and whitelisted origins
-      if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true)
-      // In production allow any render.com subdomain (for preview deploys)
-      if (config.isProduction && origin.endsWith('.onrender.com')) return cb(null, true)
+      // No origin = server-to-server (curl, Postman) — always allow
+      if (!origin) return cb(null, true)
+      // Allow any onrender.com subdomain (covers preview deploys too)
+      if (origin.endsWith('.onrender.com')) return cb(null, true)
+      // Allow whitelisted local origins
+      if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true)
       cb(new Error(`CORS: origin ${origin} not allowed`))
     },
     credentials: true,

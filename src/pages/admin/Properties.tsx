@@ -171,7 +171,7 @@ export default function Properties() {
                   </div>
                 </td>
                 <td className="px-5 py-3.5 text-sm font-bold text-[#2d6a4f] whitespace-nowrap">
-                  ${Number(p.price).toLocaleString()}
+                  KES {Number(p.price).toLocaleString()}
                 </td>
                 <td className="px-5 py-3.5 text-sm text-gray-600">{p.type}</td>
                 <td className="px-5 py-3.5"><StatusBadge status={p.status} /></td>

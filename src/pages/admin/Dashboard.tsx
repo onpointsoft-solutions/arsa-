@@ -108,7 +108,7 @@ export default function Dashboard() {
                   <p className="text-xs text-gray-500">{p.city}, {p.country}</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-sm font-bold text-[#2d6a4f]">${p.price.toLocaleString()}</p>
+                  <p className="text-sm font-bold text-[#2d6a4f]">KES {p.price.toLocaleString()}</p>
                   <StatusBadge status={p.status} />
                 </div>
               </div>

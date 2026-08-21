@@ -415,7 +415,7 @@ export default function PropertiesPage() {
                       <div className="p-4">
                         <div className="flex items-center justify-between mb-3">
                           <p className="font-display text-xl text-[#2d6a4f] font-semibold">
-                            ${Number(p.price).toLocaleString()}
+                            KES {Number(p.price).toLocaleString()}
                           </p>
                           <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded font-medium">
                             {p.type}

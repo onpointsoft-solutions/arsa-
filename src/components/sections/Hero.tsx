@@ -114,10 +114,10 @@ export default function Hero() {
                 className="w-full px-3 py-2 border border-gray-200 rounded text-sm focus:outline-none focus:border-[#2d6a4f]"
               >
                 <option value="">Any Price</option>
-                <option value="0-500000">Under $500k</option>
-                <option value="500000-1000000">$500k – $1M</option>
-                <option value="1000000-5000000">$1M – $5M</option>
-                <option value="5000000-999999999">$5M+</option>
+                <option value="0-500000">Under KES 500k</option>
+                <option value="500000-1000000">KES 500k – 1M</option>
+                <option value="1000000-5000000">KES 1M – 5M</option>
+                <option value="5000000-999999999">KES 5M+</option>
               </select>
             </div>
 

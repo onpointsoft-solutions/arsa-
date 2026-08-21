@@ -236,3 +236,31 @@ CREATE TABLE IF NOT EXISTS activity_logs (
   INDEX idx_log_action    (action),
   INDEX idx_log_created   (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─────────────────────────────────────────────
+-- newsletter_subscribers
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+  id            VARCHAR(36)  NOT NULL PRIMARY KEY,
+  email         VARCHAR(255) NOT NULL UNIQUE,
+  unsubscribe_token VARCHAR(64) NOT NULL UNIQUE,
+  is_active     TINYINT(1)   NOT NULL DEFAULT 1,
+  created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  unsubscribed_at DATETIME,
+  INDEX idx_newsletter_email  (email),
+  INDEX idx_newsletter_token  (unsubscribe_token),
+  INDEX idx_newsletter_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─────────────────────────────────────────────
+-- newsletter_blasts  (audit trail of sent campaigns)
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS newsletter_blasts (
+  id           VARCHAR(36)  NOT NULL PRIMARY KEY,
+  subject      VARCHAR(255) NOT NULL,
+  content      TEXT         NOT NULL,
+  sent_by      VARCHAR(36)  NOT NULL,
+  recipient_count INT        NOT NULL DEFAULT 0,
+  created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_blast_user FOREIGN KEY (sent_by) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

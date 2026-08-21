@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FOOTER_LINKS } from '../data/constants'
-import { messagesApi } from '../../services/api'
+
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const SOCIAL = [
   { name: 'Facebook',  icon: '𝐟', href: 'https://facebook.com' },
@@ -19,9 +20,10 @@ export default function Footer() {
     e.preventDefault()
     if (!footerEmail) return
     try {
-      await messagesApi.create({
-        name: 'Footer Subscriber', email: footerEmail,
-        subject: 'Newsletter Subscription', body: `Footer subscription: ${footerEmail}`,
+      await fetch(`${BASE_URL}/newsletter/subscribe`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email: footerEmail }),
       })
     } catch {}
     setFooterSent(true)

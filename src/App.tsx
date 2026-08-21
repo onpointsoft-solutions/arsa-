@@ -20,6 +20,7 @@ import Testimonials from './pages/admin/Testimonials'
 import Messages     from './pages/admin/Messages'
 import Settings     from './pages/admin/Settings'
 import Media        from './pages/admin/Media'
+import Newsletter   from './pages/admin/Newsletter'
 
 export default function App() {
   return (
@@ -58,6 +59,7 @@ export default function App() {
             <Route path="users"        element={<Users />} />
             <Route path="testimonials" element={<Testimonials />} />
             <Route path="messages"     element={<Messages />} />
+            <Route path="newsletter"   element={<Newsletter />} />
             <Route path="media"        element={<Media />} />
             <Route path="settings"     element={<Settings />} />
           </Route>

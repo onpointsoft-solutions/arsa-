@@ -19,6 +19,7 @@ import messageRoutes     from './routes/message.routes'
 import appointmentRoutes from './routes/appointment.routes'
 import settingsRoutes    from './routes/settings.routes'
 import uploadRoutes      from './routes/upload.routes'
+import newsletterRoutes  from './routes/newsletter.routes'
 
 const app: Application = express()
 
@@ -106,6 +107,7 @@ app.use('/api/messages',     messageRoutes)
 app.use('/api/appointments', appointmentRoutes)
 app.use('/api/settings',     settingsRoutes)
 app.use('/api/upload',       uploadRoutes)
+app.use('/api/newsletter',   newsletterRoutes)
 
 // ── Error handlers (must be last) ─────────────────────────────────────────────
 app.use(notFoundHandler)

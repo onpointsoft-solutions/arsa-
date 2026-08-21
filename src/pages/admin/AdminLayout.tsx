@@ -11,6 +11,7 @@ const NAV = [
   { label: 'Users',        icon: '◑',  href: '/admin/users' },
   { label: 'Testimonials', icon: '★',  href: '/admin/testimonials' },
   { label: 'Messages',     icon: '✉',  href: '/admin/messages' },
+  { label: 'Newsletter',   icon: '📧', href: '/admin/newsletter' },
   { label: 'Settings',     icon: '⚙',  href: '/admin/settings' },
 ]
 

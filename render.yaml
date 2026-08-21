@@ -7,8 +7,8 @@ services:
     region: oregon
     plan: free
     rootDir: backend
-    buildCommand: pnpm install --no-frozen-lockfile
-    startCommand: tsx src/server.ts
+    buildCommand: pnpm install --frozen-lockfile --prod=false
+    startCommand: pnpm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
@@ -48,7 +48,7 @@ services:
     runtime: static
     plan: free
     rootDir: .
-    buildCommand: pnpm install --no-frozen-lockfile && pnpm run build
+    buildCommand: pnpm install --frozen-lockfile && pnpm run build
     staticPublishPath: dist
     pullRequestPreviewsEnabled: false
     headers:

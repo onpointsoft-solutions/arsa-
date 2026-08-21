@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "echo 'No build step — using tsx at runtime'",
-    "start": "tsx src/server.ts",
+    "start": "node_modules/.bin/tsx src/server.ts",
     "postinstall": "mkdir -p public/uploads",
     "db:init": "tsx src/db/init.ts",
     "db:seed": "tsx src/db/seed.ts",

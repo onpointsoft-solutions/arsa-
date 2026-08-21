@@ -86,14 +86,21 @@ services:
   - type: web
     name: arsa-frontend
     runtime: static
+    plan: free
 
-    # Build from repo root (Vite project)
     rootDir: .
 
     buildCommand: pnpm install --no-frozen-lockfile && pnpm run build
     staticPublishPath: ./dist
 
-    # SPA routing — serve index.html for all routes
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+
     routes:
       - type: rewrite
         source: /*

@@ -2,6 +2,8 @@ import express, { Application, Request, Response, NextFunction } from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import config from './config/index'
 import logger from './utils/logger'
 import {
@@ -13,17 +15,32 @@ import { morganMiddleware, requestLogger } from './middleware/logging'
 // Import routes
 import authRoutes from './routes/auth.routes'
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
 const app: Application = express()
 
 // Security middleware
-app.use(helmet())
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }))
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads')))
 
 // CORS configuration
+const ALLOWED_ORIGINS = [
+  config.clientUrl,
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:8443',
+]
 app.use(
   cors({
-    origin: config.clientUrl,
+    origin: (origin, cb) => {
+      // Allow requests with no origin (e.g. curl, Postman) or whitelisted origins
+      if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true)
+      cb(new Error('Not allowed by CORS'))
+    },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 )
@@ -36,13 +53,14 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }))
 app.use(morganMiddleware)
 app.use(requestLogger)
 
-// Rate limiting
+// Rate limiting — relaxed in development
 const limiter = rateLimit({
   windowMs: config.rateLimit.windowMs,
-  max: config.rateLimit.maxRequests,
+  max: config.isDevelopment ? 0 : config.rateLimit.maxRequests, // 0 = unlimited in dev
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => config.isDevelopment, // bypass entirely in dev
 })
 
 app.use('/api/', limiter)
@@ -67,6 +85,7 @@ import testimonialRoutes from './routes/testimonial.routes'
 import messageRoutes from './routes/message.routes'
 import appointmentRoutes from './routes/appointment.routes'
 import settingsRoutes from './routes/settings.routes'
+import uploadRoutes from './routes/upload.routes'
 
 // API Routes
 app.use('/api/auth', authRoutes)
@@ -79,6 +98,7 @@ app.use('/api/testimonials', testimonialRoutes)
 app.use('/api/messages', messageRoutes)
 app.use('/api/appointments', appointmentRoutes)
 app.use('/api/settings', settingsRoutes)
+app.use('/api/upload', uploadRoutes)
 
 // 404 handler
 app.use(notFoundHandler)

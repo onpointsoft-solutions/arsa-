@@ -1,14 +1,16 @@
 import app from './app'
 import config from './config/index'
 import logger from './utils/logger'
-import prisma from './lib/prisma'
+import pool from './lib/db'
 
 const PORT = config.port
 
 const startServer = async () => {
   try {
-    // Test database connection
-    await prisma.$queryRaw`SELECT 1`
+    // Verify DB connection
+    const conn = await pool.getConnection()
+    await conn.ping()
+    conn.release()
     logger.info('Database connected successfully')
   } catch (error) {
     logger.error('Database connection failed:', error)
@@ -18,27 +20,22 @@ const startServer = async () => {
   const server = app.listen(PORT, '0.0.0.0', () => {
     logger.info(`Server is running on http://localhost:${PORT}`)
     logger.info(`Environment: ${config.nodeEnv}`)
-    logger.info(`API Documentation: http://localhost:${PORT}/api-docs`)
   })
 
-  // Graceful shutdown
   const gracefulShutdown = async (signal: string) => {
     logger.info(`Received ${signal}, starting graceful shutdown...`)
 
     server.close(async () => {
       logger.info('HTTP server closed')
-
       try {
-        await prisma.$disconnect()
-        logger.info('Database connection closed')
+        await pool.end()
+        logger.info('Database pool closed')
       } catch (error) {
-        logger.error('Error disconnecting database:', error)
+        logger.error('Error closing database pool:', error)
       }
-
       process.exit(0)
     })
 
-    // Force shutdown after 10 seconds
     setTimeout(() => {
       logger.error('Forced shutdown due to timeout')
       process.exit(1)
@@ -46,10 +43,10 @@ const startServer = async () => {
   }
 
   process.on('SIGTERM', () => gracefulShutdown('SIGTERM'))
-  process.on('SIGINT', () => gracefulShutdown('SIGINT'))
+  process.on('SIGINT',  () => gracefulShutdown('SIGINT'))
 
   process.on('unhandledRejection', (reason, promise) => {
-    logger.error('Unhandled Rejection at:', promise, 'reason:', reason)
+    logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`)
   })
 
   process.on('uncaughtException', (error) => {

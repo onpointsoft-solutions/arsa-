@@ -5,7 +5,7 @@ import { AuthRequest } from '../middleware/auth'
 import { sendSuccess, sendPaginated } from '../utils/response'
 import { ValidationError, AuthorizationError, NotFoundError } from '../utils/errors'
 import { query, queryOne, execute } from '../lib/db'
-import { sendEmail, templates } from '../utils/email'
+import { sendEmail, templates, verifyEmailConfig } from '../utils/email'
 import config from '../config/index'
 import logger from '../utils/logger'
 
@@ -56,12 +56,17 @@ export const subscribe = async (req: AuthRequest, res: Response): Promise<void> 
       [id, email, token]
     )
 
-    // Send welcome email (non-blocking — don't fail subscription if email fails)
-    const tmpl = templates.welcome(email, unsubscribeUrl(token))
-    sendEmail({ to: email, ...tmpl }).catch(() => {})
+    logger.info(`[NEWSLETTER] New subscriber saved: ${email}`)
 
-    logger.info(`Newsletter subscription: ${email}`)
-    sendSuccess(res, {}, 'Subscribed successfully', 201)
+    // Send welcome email — await so we can log the result
+    const tmpl  = templates.welcome(email, unsubscribeUrl(token))
+    const result = await sendEmail({ to: email, ...tmpl })
+    if (!result.ok) {
+      logger.warn(`[NEWSLETTER] Welcome email failed for ${email}: ${result.error}`)
+    }
+
+    logger.info(`[NEWSLETTER] Subscribe complete for ${email}`)
+    sendSuccess(res, { emailSent: result.ok, emailError: result.error }, 'Subscribed successfully', 201)
   } catch (error) {
     logger.error('Newsletter subscribe error:', error)
     if (error instanceof ValidationError) {
@@ -179,28 +184,44 @@ export const sendBlast = async (req: AuthRequest, res: Response): Promise<void> 
       [blastId, subject, content, req.user.id, subscribers.length]
     )
 
-    // Send emails in batches of 50 to avoid overwhelming the SMTP server
-    const BATCH = 50
-    let sent = 0
+    // Send emails in batches of 50
+    const BATCH  = 50
+    let sent     = 0
+    let failed   = 0
+    const errors: string[] = []
 
     for (let i = 0; i < subscribers.length; i += BATCH) {
       const batch = subscribers.slice(i, i + BATCH)
-      await Promise.allSettled(
+      const results = await Promise.allSettled(
         batch.map(async (sub: any) => {
-          const tmpl = templates.blast(subject, content, unsubscribeUrl(sub.unsubscribe_token))
-          const ok   = await sendEmail({ to: sub.email, ...tmpl })
-          if (ok) sent++
+          const tmpl   = templates.blast(subject, content, unsubscribeUrl(sub.unsubscribe_token))
+          const result = await sendEmail({ to: sub.email, ...tmpl })
+          if (result.ok) {
+            sent++
+          } else {
+            failed++
+            errors.push(`${sub.email}: ${result.error}`)
+            logger.warn(`[NEWSLETTER] Failed to send to ${sub.email}: ${result.error}`)
+          }
         })
       )
+      // Log any unexpected promise rejections
+      results.forEach((r, idx) => {
+        if (r.status === 'rejected') {
+          logger.error(`[NEWSLETTER] Unexpected error for batch item ${i + idx}: ${r.reason}`)
+          failed++
+        }
+      })
     }
 
-    logger.info(`Newsletter blast sent: "${subject}" to ${sent}/${subscribers.length} subscribers by ${req.user.email}`)
+    logger.info(`[NEWSLETTER] Blast complete: "${subject}" sent=${sent} failed=${failed} total=${subscribers.length}`)
 
     sendSuccess(res, {
       blastId,
-      total:  subscribers.length,
+      total:   subscribers.length,
       sent,
-      failed: subscribers.length - sent,
+      failed,
+      errors:  errors.slice(0, 10), // return first 10 errors for debugging
     }, `Newsletter sent to ${sent} subscriber${sent !== 1 ? 's' : ''}`)
   } catch (error) {
     logger.error('Send blast error:', error)
@@ -257,7 +278,44 @@ export const listBlasts = async (req: AuthRequest, res: Response): Promise<void>
   }
 }
 
-// ── Stats (admin) ─────────────────────────────────────────────────────────────
+// ── Test SMTP connection (admin) ──────────────────────────────────────────────
+
+export const testEmailConfig = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (req.user?.role !== 'ADMIN') throw new AuthorizationError('Admins only')
+
+    const { to } = req.query
+    const target = (to as string) || req.user.email
+
+    // Verify transport first
+    const verify = await verifyEmailConfig()
+    if (!verify.ok) {
+      res.status(500).json({ success: false, message: verify.message })
+      return
+    }
+
+    // Send a test email
+    const result = await sendEmail({
+      to:      target,
+      subject: '[TEST] ARSA Real Estate — SMTP Test',
+      html:    `<h2>SMTP Test Successful</h2><p>This confirms your email configuration is working correctly.</p><p><strong>Time:</strong> ${new Date().toISOString()}</p>`,
+      text:    `SMTP Test OK at ${new Date().toISOString()}`,
+    })
+
+    if (result.ok) {
+      sendSuccess(res, { to: target, verifyMessage: verify.message }, `Test email sent to ${target}`)
+    } else {
+      res.status(500).json({ success: false, message: result.error ?? 'Send failed' })
+    }
+  } catch (error) {
+    logger.error('Test email error:', error)
+    if (error instanceof AuthorizationError) {
+      res.status(error.statusCode).json({ success: false, message: error.message })
+    } else {
+      res.status(500).json({ success: false, message: String(error) })
+    }
+  }
+}
 
 export const getStats = async (req: AuthRequest, res: Response): Promise<void> => {
   try {

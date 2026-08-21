@@ -2,14 +2,29 @@ import nodemailer from 'nodemailer'
 import config from '../config/index'
 import logger from './logger'
 
+// ── Diagnostics ───────────────────────────────────────────────────────────────
+
+export function getEmailConfig() {
+  return {
+    host:     config.email.host,
+    port:     config.email.port,
+    secure:   config.email.port === 465,
+    user:     config.email.user   ? `${config.email.user.slice(0, 4)}****` : '(not set)',
+    password: config.email.password ? '(set)' : '(not set)',
+    from:     config.email.from,
+    ready:    !!(config.email.user && config.email.password),
+  }
+}
+
 // ── Transport ─────────────────────────────────────────────────────────────────
 
 function createTransport() {
-  // If no SMTP credentials are configured, use Ethereal (dev preview only)
   if (!config.email.user || !config.email.password) {
-    logger.warn('SMTP credentials not set — emails will be logged but not sent')
+    logger.warn('[EMAIL] SMTP credentials not set — SMTP_USER and SMTP_PASSWORD are required')
     return null
   }
+
+  logger.debug(`[EMAIL] Creating transport — host:${config.email.host} port:${config.email.port} user:${config.email.user}`)
 
   return nodemailer.createTransport({
     host:   config.email.host,
@@ -20,7 +35,33 @@ function createTransport() {
       pass: config.email.password,
     },
     tls: { rejectUnauthorized: false },
+    debug: true,   // logs SMTP conversation
+    logger: false, // use our own logger below
   })
+}
+
+// ── Verify connection (call on startup or via test endpoint) ──────────────────
+
+export async function verifyEmailConfig(): Promise<{ ok: boolean; message: string }> {
+  const cfg = getEmailConfig()
+  logger.info(`[EMAIL] Config: ${JSON.stringify(cfg)}`)
+
+  if (!cfg.ready) {
+    const msg = '[EMAIL] SMTP not configured — SMTP_USER or SMTP_PASSWORD missing'
+    logger.warn(msg)
+    return { ok: false, message: msg }
+  }
+
+  const transport = createTransport()!
+  try {
+    await transport.verify()
+    logger.info('[EMAIL] SMTP connection verified OK')
+    return { ok: true, message: 'SMTP connection successful' }
+  } catch (err: any) {
+    const msg = `[EMAIL] SMTP verify failed: ${err?.message ?? err}`
+    logger.error(msg)
+    return { ok: false, message: msg }
+  }
 }
 
 // ── Send helper ───────────────────────────────────────────────────────────────
@@ -32,13 +73,13 @@ export interface MailOptions {
   text?:   string
 }
 
-export async function sendEmail(opts: MailOptions): Promise<boolean> {
+export async function sendEmail(opts: MailOptions): Promise<{ ok: boolean; error?: string }> {
   const transport = createTransport()
 
   if (!transport) {
-    // Dev fallback — log the email so you can see it without real SMTP
-    logger.info(`[EMAIL NOT SENT — no SMTP config]\nTo: ${opts.to}\nSubject: ${opts.subject}\n${opts.text ?? ''}`)
-    return false
+    const msg = `[EMAIL] Skipped (no SMTP config) — To:${opts.to} Subject:${opts.subject}`
+    logger.warn(msg)
+    return { ok: false, error: 'SMTP not configured' }
   }
 
   try {
@@ -49,11 +90,12 @@ export async function sendEmail(opts: MailOptions): Promise<boolean> {
       html:    opts.html,
       text:    opts.text ?? opts.html.replace(/<[^>]+>/g, ''),
     })
-    logger.info(`Email sent: ${info.messageId} → ${opts.to}`)
-    return true
-  } catch (err) {
-    logger.error('Email send error:', err)
-    return false
+    logger.info(`[EMAIL] Sent OK — id:${info.messageId} to:${opts.to} subject:"${opts.subject}"`)
+    return { ok: true }
+  } catch (err: any) {
+    const msg = `[EMAIL] Send failed — to:${opts.to} subject:"${opts.subject}" error:${err?.message ?? err}`
+    logger.error(msg)
+    return { ok: false, error: err?.message ?? String(err) }
   }
 }
 
@@ -98,7 +140,7 @@ const baseLayout = (content: string) => `
 
 export const templates = {
 
-  welcome: (email: string, unsubscribeUrl: string) => {
+  welcome: (email: string, unsubUrl: string) => {
     const html = baseLayout(`
       <h2>Welcome to ARSA Real Estate</h2>
       <p>Thank you for subscribing to our newsletter. You'll be the first to know about:</p>
@@ -113,16 +155,16 @@ export const templates = {
         You subscribed with <strong>${email}</strong>.
         If this was a mistake, you can unsubscribe at any time using the link below.
       </p>
-    `).replace('{{unsubscribeUrl}}', unsubscribeUrl)
+    `).replace('{{unsubscribeUrl}}', unsubUrl)
 
     return {
       subject: 'Welcome to ARSA Real Estate Newsletter',
       html,
-      text: `Welcome to ARSA Real Estate! You've successfully subscribed. Unsubscribe: ${unsubscribeUrl}`,
+      text: `Welcome to ARSA Real Estate! You've successfully subscribed.\nUnsubscribe: ${unsubUrl}`,
     }
   },
 
-  blast: (subject: string, content: string, unsubscribeUrl: string) => {
+  blast: (subject: string, content: string, unsubUrl: string) => {
     const html = baseLayout(`
       <h2>${subject}</h2>
       <div style="color:#374151;line-height:1.8;font-size:15px;">${content.replace(/\n/g, '<br/>')}</div>
@@ -130,12 +172,12 @@ export const templates = {
       <p style="font-size:13px;color:#6b7280;">
         You're receiving this because you subscribed to ARSA Real Estate updates.
       </p>
-    `).replace(/\{\{unsubscribeUrl\}\}/g, unsubscribeUrl)
+    `).replace(/\{\{unsubscribeUrl\}\}/g, unsubUrl)
 
     return {
       subject,
       html,
-      text: `${subject}\n\n${content}\n\nUnsubscribe: ${unsubscribeUrl}`,
+      text: `${subject}\n\n${content}\n\nUnsubscribe: ${unsubUrl}`,
     }
   },
 }

@@ -3,7 +3,6 @@ import cors from 'cors'
 import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
 import path from 'path'
-import { fileURLToPath } from 'url'
 import config from './config/index'
 import { errorHandler, notFoundHandler } from './middleware/errorHandler'
 import { morganMiddleware, requestLogger } from './middleware/logging'
@@ -20,8 +19,6 @@ import messageRoutes     from './routes/message.routes'
 import appointmentRoutes from './routes/appointment.routes'
 import settingsRoutes    from './routes/settings.routes'
 import uploadRoutes      from './routes/upload.routes'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const app: Application = express()
 

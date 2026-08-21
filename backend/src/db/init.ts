@@ -5,14 +5,11 @@
  * Usage:  cd backend && npm run db:init
  */
 import { readFileSync } from 'fs'
-import { join, dirname } from 'path'
-import { fileURLToPath } from 'url'
+import { join } from 'path'
 import mysql from 'mysql2/promise'
 import dotenv from 'dotenv'
 
 dotenv.config()
-
-const __dirname = dirname(fileURLToPath(import.meta.url))
 
 function parseDbUrl(raw: string) {
   const url       = new URL(raw)

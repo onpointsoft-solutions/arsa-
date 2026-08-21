@@ -2,9 +2,8 @@ import { v4 as uuidv4 } from 'uuid'
 import dotenv from 'dotenv'
 import { resolve } from 'path'
 
-// Load .env from backend root regardless of where the script is run from
 dotenv.config({ path: resolve(process.cwd(), '.env') })
-dotenv.config() // fallback: load from cwd
+dotenv.config()
 
 import { query, execute } from '../lib/db'
 import { hashPassword } from '../utils/password'

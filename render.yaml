@@ -20,8 +20,8 @@ services:
 
     rootDir: backend
 
-    buildCommand: npm install --legacy-peer-deps && npm run build
-    startCommand: npm run start
+    buildCommand: pnpm install --no-frozen-lockfile && pnpm run build
+    startCommand: pnpm run start
 
     healthCheckPath: /api/health
 
@@ -90,7 +90,7 @@ services:
     # Build from repo root (Vite project)
     rootDir: .
 
-    buildCommand: npm install --legacy-peer-deps && npm run build
+    buildCommand: pnpm install --no-frozen-lockfile && pnpm run build
     staticPublishPath: ./dist
 
     # SPA routing — serve index.html for all routes

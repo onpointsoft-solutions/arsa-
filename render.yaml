@@ -1,80 +1,40 @@
-##############################################################################
-# ARSA Real Estate — Render deployment blueprint
-#
-# Two services:
-#   1. arsa-backend   — Node/Express API (Web Service)
-#   2. arsa-frontend  — React/Vite SPA (Static Site)
-#
-# Set the env vars marked "sync: false" manually in the Render dashboard
-# before first deploy (they contain secrets).
-##############################################################################
-
 services:
 
-  # ── Backend Web Service ────────────────────────────────────────────────────
+  # ── Backend — Node.js Web Service ─────────────────────────────────────────
   - type: web
     name: arsa-backend
     runtime: node
     region: oregon
     plan: free
-
     rootDir: backend
-
     buildCommand: pnpm install --no-frozen-lockfile && pnpm run build
-    startCommand: pnpm run start
-
+    startCommand: node dist/server.js
     healthCheckPath: /api/health
-
     envVars:
       - key: NODE_ENV
         value: production
-
       - key: PORT
         value: 10000
-
-      # The backend's own public URL — filled in automatically after first deploy
       - key: API_URL
-        fromService:
-          type: web
-          name: arsa-backend
-          property: host
-          # Render provides the host; prefix with https://
-          # You may need to set this manually after first deploy:
-          # https://<your-service>.onrender.com
-
-      # Frontend URL — set after the static site is deployed
+        sync: false
       - key: CLIENT_URL
-        sync: false   # set manually in Render dashboard
-
-      # Database
+        sync: false
       - key: DATABASE_URL
-        sync: false   # set manually — your TiDB Cloud connection string
-
-      # JWT secrets — generate strong random values
+        sync: false
       - key: JWT_SECRET
         generateValue: true
-
       - key: JWT_REFRESH_SECRET
         generateValue: true
-
       - key: JWT_EXPIRE
         value: 7d
-
       - key: JWT_REFRESH_EXPIRE
         value: 30d
-
-      # Rate limiting
       - key: RATE_LIMIT_WINDOW_MS
         value: "900000"
-
       - key: RATE_LIMIT_MAX_REQUESTS
         value: "200"
-
-      # Logging
       - key: LOG_LEVEL
         value: info
-
-      # Cloudinary (optional)
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
       - key: CLOUDINARY_API_KEY
@@ -82,32 +42,26 @@ services:
       - key: CLOUDINARY_API_SECRET
         sync: false
 
-  # ── Frontend Static Site ───────────────────────────────────────────────────
+  # ── Frontend — Static Site (Render CDN, no vite server at runtime) ─────────
   - type: web
     name: arsa-frontend
     runtime: static
     plan: free
-
     rootDir: .
-
     buildCommand: pnpm install --no-frozen-lockfile && pnpm run build
-    staticPublishPath: ./dist
-
+    staticPublishPath: dist
+    pullRequestPreviewsEnabled: false
     headers:
-      - path: /*
-        name: Cache-Control
-        value: public, max-age=0, must-revalidate
       - path: /assets/*
         name: Cache-Control
         value: public, max-age=31536000, immutable
-
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
-
     envVars:
-      # Point the frontend at the deployed backend
-      # Set this to https://<your-backend-service>.onrender.com/api
       - key: VITE_API_URL
-        sync: false   # set manually in Render dashboard
+        sync: false

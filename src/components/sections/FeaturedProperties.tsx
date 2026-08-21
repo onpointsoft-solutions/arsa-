@@ -26,7 +26,7 @@ function mapApiProperty(p: any): DisplayProperty {
     id:       p.id,
     title:    p.title,
     location: `${p.city}, ${p.country}`,
-    price:    `$${Number(p.price).toLocaleString()}`,
+    price:    `KES ${Number(p.price).toLocaleString()}`,
     beds:     p.bedrooms,
     baths:    p.bathrooms,
     sqft:     Number(p.squareFeet).toLocaleString(),

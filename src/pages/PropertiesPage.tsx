@@ -73,7 +73,7 @@ function PropertyModal({ prop, onClose }: { prop: Property; onClose: () => void 
               <h2 className="font-display text-2xl text-[#111827]">{prop.title}</h2>
               <p className="text-gray-500 text-sm mt-0.5">📍 {prop.address}, {prop.city}, {prop.country}</p>
             </div>
-            <p className="font-display text-2xl text-[#2d6a4f] shrink-0">${Number(prop.price).toLocaleString()}</p>
+            <p className="font-display text-2xl text-[#2d6a4f] shrink-0">KES {Number(prop.price).toLocaleString()}</p>
           </div>
 
           {/* Stats */}
@@ -306,7 +306,7 @@ export default function PropertiesPage() {
 
               {/* Price range */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Price Range ($)</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Price Range (KES)</label>
                 <div className="flex gap-2">
                   <input
                     type="number"

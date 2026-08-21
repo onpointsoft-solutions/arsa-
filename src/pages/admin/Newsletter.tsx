@@ -59,8 +59,12 @@ export default function Newsletter() {
   const [showBlast, setShowBlast] = useState(false)
   const [blastForm, setBlastForm] = useState({ subject: '', content: '' })
   const [sending, setSending]     = useState(false)
-  const [sendResult, setSendResult] = useState<{ sent: number; failed: number } | null>(null)
+  const [sendResult, setSendResult] = useState<{ sent: number; failed: number; errors?: string[] } | null>(null)
   const [sendErr, setSendErr]     = useState('')
+
+  // SMTP test
+  const [testing, setTesting]     = useState(false)
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null)
 
   // Subscribers list
   const [subPage, setSubPage]     = useState(1)
@@ -84,18 +88,41 @@ export default function Newsletter() {
       .finally(() => setStatsLoading(false))
   }, [showBlast])
 
+  const handleTestEmail = async () => {
+    setTesting(true)
+    setTestResult(null)
+    try {
+      const res: any = await apiGet('/newsletter/test-email')
+      setTestResult({ ok: true, message: res.message + ` (sent to ${res.data?.to})` })
+    } catch (err) {
+      setTestResult({ ok: false, message: err instanceof Error ? err.message : 'Test failed' })
+    } finally {
+      setTesting(false)
+    }
+  }
+
   const handleSendBlast = async (e: React.FormEvent) => {
     e.preventDefault()
     setSending(true); setSendErr(''); setSendResult(null)
     try {
       const res: any = await apiPost('/newsletter/blast', blastForm)
-      setSendResult({ sent: res.data.sent, failed: res.data.failed })
+      setSendResult({ sent: res.data.sent, failed: res.data.failed, errors: res.data.errors })
       setBlastForm({ subject: '', content: '' })
       refetchBlasts()
+      // Reload stats
+      apiGet<any>('/newsletter/stats').then(r => setStats(r.data)).catch(() => {})
+      // Auto-close modal after 4 seconds if no errors
+      if (!res.data.errors?.length) {
+        setTimeout(() => {
+          setShowBlast(false)
+          setSendResult(null)
+        }, 4000)
+      }
     } catch (err) {
       setSendErr(err instanceof Error ? err.message : 'Failed to send')
     } finally {
-      setSending(false) }
+      setSending(false)
+    }
   }
 
   const TABS = [
@@ -156,6 +183,47 @@ export default function Newsletter() {
             <Btn onClick={() => { setShowBlast(true); setSendResult(null); setSendErr('') }}>
               ✉ Compose & Send
             </Btn>
+          </div>
+
+          {/* SMTP Diagnostics */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6">
+            <h3 className="font-semibold text-[#111827] mb-1">SMTP Diagnostics</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              Test that the email server is reachable and credentials are correct.
+              A test email will be sent to your admin account.
+            </p>
+
+            {testResult && (
+              <div className={`text-sm px-4 py-3 rounded-lg font-medium mb-4 ${
+                testResult.ok
+                  ? 'bg-green-50 border border-green-200 text-green-700'
+                  : 'bg-red-50   border border-red-200   text-red-700'
+              }`}>
+                {testResult.ok ? '✓ ' : '✕ '}{testResult.message}
+              </div>
+            )}
+
+            <Btn
+              variant="outline"
+              onClick={handleTestEmail}
+              disabled={testing}
+            >
+              {testing ? (
+                <span className="flex items-center gap-2">
+                  <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#2d6a4f]" />
+                  Testing SMTP…
+                </span>
+              ) : '🔌 Test SMTP Connection'}
+            </Btn>
+
+            <div className="mt-4 bg-gray-50 rounded-lg p-4 text-xs text-gray-500 space-y-1 font-mono">
+              <p>Ensure these env vars are set on the server:</p>
+              <p><span className="text-[#2d6a4f]">SMTP_HOST</span> — e.g. smtp.gmail.com</p>
+              <p><span className="text-[#2d6a4f]">SMTP_PORT</span> — 587 (TLS) or 465 (SSL)</p>
+              <p><span className="text-[#2d6a4f]">SMTP_USER</span> — your Gmail address</p>
+              <p><span className="text-[#2d6a4f]">SMTP_PASSWORD</span> — Gmail App Password (not your login password)</p>
+              <p><span className="text-[#2d6a4f]">SMTP_FROM</span> — sender address shown in emails</p>
+            </div>
           </div>
         </div>
       )}
@@ -243,6 +311,11 @@ export default function Newsletter() {
                 <span className="text-green-600 font-bold">{sendResult.sent}</span> delivered
                 {sendResult.failed > 0 && <>, <span className="text-red-500 font-bold">{sendResult.failed}</span> failed</>}
               </p>
+              {sendResult.errors && sendResult.errors.length > 0 && (
+                <div className="text-left bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-red-700 font-mono space-y-1 max-h-32 overflow-y-auto">
+                  {sendResult.errors.map((e, i) => <p key={i}>✕ {e}</p>)}
+                </div>
+              )}
               <div className="flex gap-3 justify-center pt-2">
                 <Btn onClick={() => { setSendResult(null); setBlastForm({ subject: '', content: '' }) }}>
                   Send Another

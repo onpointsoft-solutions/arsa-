@@ -84,7 +84,8 @@ export async function sendEmail(opts: MailOptions): Promise<{ ok: boolean; error
 
   try {
     const info = await transport.sendMail({
-      from:    `"ARSA Real Estate" <${config.email.from}>`,
+      // Gmail requires from = authenticated user; show brand name via display name
+      from:    `"ARSA Real Estate" <${config.email.user}>`,
       to:      Array.isArray(opts.to) ? opts.to.join(', ') : opts.to,
       subject: opts.subject,
       html:    opts.html,

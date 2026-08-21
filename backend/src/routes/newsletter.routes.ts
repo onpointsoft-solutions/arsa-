@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { body, param } from 'express-validator'
+import { body, param, query } from 'express-validator'
 import {
   subscribe,
   unsubscribe,
@@ -7,6 +7,7 @@ import {
   sendBlast,
   listBlasts,
   getStats,
+  testEmailConfig,
 } from '../controllers/newsletter.controller'
 import { authenticate, requireAdmin } from '../middleware/auth'
 import { validateRequest } from '../middleware/validation'
@@ -22,14 +23,22 @@ router.post(
   subscribe
 )
 
-// Unsubscribe via token — renders HTML page (linked from email footer)
-router.get('/unsubscribe/:token', param('token').notEmpty(), validateRequest, unsubscribe)
+// Renders an HTML unsubscribe confirmation page (linked from email footer)
+router.get(
+  '/unsubscribe/:token',
+  param('token').notEmpty(),
+  validateRequest,
+  unsubscribe
+)
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
 
 router.get('/subscribers', authenticate, requireAdmin, listSubscribers)
 router.get('/blasts',      authenticate, requireAdmin, listBlasts)
 router.get('/stats',       authenticate, requireAdmin, getStats)
+
+// Test SMTP — GET /api/newsletter/test-email?to=you@example.com
+router.get('/test-email',  authenticate, requireAdmin, testEmailConfig)
 
 router.post(
   '/blast',

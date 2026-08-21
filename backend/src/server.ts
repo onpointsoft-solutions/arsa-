@@ -5,9 +5,9 @@ import pool from './lib/db'
 
 const PORT = config.port
 
-const startServer = async () => {
+async function startServer() {
+  // Verify DB connection before accepting traffic
   try {
-    // Verify DB connection
     const conn = await pool.getConnection()
     await conn.ping()
     conn.release()
@@ -18,39 +18,32 @@ const startServer = async () => {
   }
 
   const server = app.listen(PORT, '0.0.0.0', () => {
-    logger.info(`Server is running on http://localhost:${PORT}`)
-    logger.info(`Environment: ${config.nodeEnv}`)
+    logger.info(`Server running on port ${PORT} [${config.nodeEnv}]`)
   })
 
-  const gracefulShutdown = async (signal: string) => {
-    logger.info(`Received ${signal}, starting graceful shutdown...`)
-
+  // ── Graceful shutdown ────────────────────────────────────────────────────────
+  const shutdown = async (signal: string) => {
+    logger.info(`${signal} received — shutting down gracefully`)
     server.close(async () => {
-      logger.info('HTTP server closed')
       try {
         await pool.end()
-        logger.info('Database pool closed')
-      } catch (error) {
-        logger.error('Error closing database pool:', error)
-      }
+        logger.info('DB pool closed')
+      } catch {}
       process.exit(0)
     })
-
-    setTimeout(() => {
-      logger.error('Forced shutdown due to timeout')
-      process.exit(1)
-    }, 10000)
+    // Force exit if graceful shutdown takes too long
+    setTimeout(() => process.exit(1), 10_000)
   }
 
-  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'))
-  process.on('SIGINT',  () => gracefulShutdown('SIGINT'))
+  process.on('SIGTERM', () => shutdown('SIGTERM'))
+  process.on('SIGINT',  () => shutdown('SIGINT'))
 
-  process.on('unhandledRejection', (reason, promise) => {
-    logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`)
+  process.on('unhandledRejection', (reason) => {
+    logger.error(`Unhandled rejection: ${reason}`)
   })
 
   process.on('uncaughtException', (error) => {
-    logger.error('Uncaught Exception:', error)
+    logger.error('Uncaught exception:', error)
     process.exit(1)
   })
 }

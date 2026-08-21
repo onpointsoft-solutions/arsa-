@@ -1,0 +1,106 @@
+##############################################################################
+# ARSA Real Estate — Render deployment blueprint
+#
+# Two services:
+#   1. arsa-backend   — Node/Express API (Web Service)
+#   2. arsa-frontend  — React/Vite SPA (Static Site)
+#
+# Set the env vars marked "sync: false" manually in the Render dashboard
+# before first deploy (they contain secrets).
+##############################################################################
+
+services:
+
+  # ── Backend Web Service ────────────────────────────────────────────────────
+  - type: web
+    name: arsa-backend
+    runtime: node
+    region: oregon
+    plan: free
+
+    rootDir: backend
+
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+
+    healthCheckPath: /api/health
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      - key: PORT
+        value: 10000
+
+      # The backend's own public URL — filled in automatically after first deploy
+      - key: API_URL
+        fromService:
+          type: web
+          name: arsa-backend
+          property: host
+          # Render provides the host; prefix with https://
+          # You may need to set this manually after first deploy:
+          # https://<your-service>.onrender.com
+
+      # Frontend URL — set after the static site is deployed
+      - key: CLIENT_URL
+        sync: false   # set manually in Render dashboard
+
+      # Database
+      - key: DATABASE_URL
+        sync: false   # set manually — your TiDB Cloud connection string
+
+      # JWT secrets — generate strong random values
+      - key: JWT_SECRET
+        generateValue: true
+
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+
+      - key: JWT_EXPIRE
+        value: 7d
+
+      - key: JWT_REFRESH_EXPIRE
+        value: 30d
+
+      # Rate limiting
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "900000"
+
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "200"
+
+      # Logging
+      - key: LOG_LEVEL
+        value: info
+
+      # Cloudinary (optional)
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+  # ── Frontend Static Site ───────────────────────────────────────────────────
+  - type: web
+    name: arsa-frontend
+    runtime: static
+
+    # Build from repo root (Vite project)
+    rootDir: .
+
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+
+    # SPA routing — serve index.html for all routes
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+    envVars:
+      # Point the frontend at the deployed backend
+      # Set this to https://<your-backend-service>.onrender.com/api
+      - key: VITE_API_URL
+        sync: false   # set manually in Render dashboard

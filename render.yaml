@@ -8,7 +8,7 @@ services:
     plan: free
     rootDir: backend
     buildCommand: pnpm install --frozen-lockfile --prod=false && pnpm run build
-    startCommand: pnpm start
+    startCommand: node start.js
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV

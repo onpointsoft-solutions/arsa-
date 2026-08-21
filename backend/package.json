@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc --project tsconfig.json",
-    "start": "node dist/server.js",
+    "start": "node start.js",
     "postinstall": "mkdir -p public/uploads",
     "db:init": "tsx src/db/init.ts",
     "db:seed": "tsx src/db/seed.ts",

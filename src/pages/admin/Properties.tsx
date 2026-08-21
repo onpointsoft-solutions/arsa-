@@ -262,7 +262,7 @@ export default function Properties() {
               <Field label="Description" className="sm:col-span-2">
                 <textarea className={inputCls} rows={3} value={form.description ?? ''} onChange={e => set('description', e.target.value)} required />
               </Field>
-              <Field label="Price ($)">
+              <Field label="Price (KES)">
                 <input type="number" min={0} className={inputCls} value={form.price ?? 0} onChange={e => set('price', parseFloat(e.target.value))} required />
               </Field>
               <Field label="Type">

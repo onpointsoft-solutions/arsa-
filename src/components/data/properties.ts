@@ -1,3 +1,10 @@
+import villa1    from '../../assets/DG-West-Reception-scaled.webp'
+import villa2    from '../../assets/DG-West-Sitting-room.webp'
+import villa3    from '../../assets/Alba-Gardens-1024x768.png'
+import villa4    from '../../assets/DG-West-Rooftop-scaled.webp'
+import villa5    from '../../assets/img-1280x720.jpg'
+import villa6    from '../../assets/DG-West-Swiming-scaled.webp'
+
 export const properties = [
   {
     id: 1,
@@ -9,7 +16,7 @@ export const properties = [
     sqft: '12,400',
     tag: 'Featured',
     type: 'House',
-    img: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=900&h=620&fit=crop&auto=format',
+    img: villa1,
   },
   {
     id: 2,
@@ -21,7 +28,7 @@ export const properties = [
     sqft: '8,200',
     tag: 'New',
     type: 'Apartment',
-    img: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=900&h=620&fit=crop&auto=format',
+    img: villa2,
   },
   {
     id: 3,
@@ -33,7 +40,7 @@ export const properties = [
     sqft: '18,600',
     tag: 'Exclusive',
     type: 'Luxury Home',
-    img: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=900&h=620&fit=crop&auto=format',
+    img: villa3,
   },
   {
     id: 4,
@@ -45,7 +52,7 @@ export const properties = [
     sqft: '9,800',
     tag: 'Featured',
     type: 'House',
-    img: 'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=900&h=620&fit=crop&auto=format',
+    img: villa4,
   },
   {
     id: 5,
@@ -57,7 +64,7 @@ export const properties = [
     sqft: '11,000',
     tag: 'New',
     type: 'Luxury Home',
-    img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&h=620&fit=crop&auto=format',
+    img: villa5,
   },
   {
     id: 6,
@@ -69,6 +76,6 @@ export const properties = [
     sqft: '10,200',
     tag: 'Exclusive',
     type: 'House',
-    img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&h=620&fit=crop&auto=format',
+    img: villa6,
   },
 ]

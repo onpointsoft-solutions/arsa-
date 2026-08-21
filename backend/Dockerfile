@@ -1,24 +1,25 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Install pnpm
+RUN npm install -g pnpm@9
 
-# Install dependencies
-RUN npm ci
+# Copy lockfile and package manifest first (layer cache)
+COPY package.json pnpm-lock.yaml ./
+COPY .npmrc ./
+
+# Install all dependencies (including tsx which runs the app)
+RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY . .
 
-# Generate Prisma client
-RUN npm run prisma:generate
+# Create uploads directory
+RUN mkdir -p public/uploads
 
-# Build TypeScript
-RUN npm run build
-
-# Expose port
+# Expose the port the app runs on
 EXPOSE 5000
 
-# Start application
-CMD ["npm", "start"]
+# Start with tsx (no compile step needed)
+CMD ["pnpm", "start"]

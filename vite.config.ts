@@ -38,6 +38,7 @@ export default defineConfig(({ mode }) => {
         '.onrender.com',
         'arsa-8dy1.onrender.com',
         'localhost',
+        'www.arsarealestate.com',
       ],
       watch: { ignored: ['**/.figma/**'] },
     },

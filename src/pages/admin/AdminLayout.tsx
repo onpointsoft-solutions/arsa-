@@ -8,6 +8,7 @@ const NAV = [
   { label: 'Properties',   icon: '⌂',  href: '/admin/properties' },
   { label: 'Categories',   icon: '⊞',  href: '/admin/categories' },
   { label: 'Locations',    icon: '◎',  href: '/admin/locations' },
+  { label: 'Services',     icon: '✦',  href: '/admin/services' },
   { label: 'Users',        icon: '◑',  href: '/admin/users' },
   { label: 'Testimonials', icon: '★',  href: '/admin/testimonials' },
   { label: 'Messages',     icon: '✉',  href: '/admin/messages' },

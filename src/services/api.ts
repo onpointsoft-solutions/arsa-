@@ -269,6 +269,27 @@ export const testimonialsApi = {
     patch<ApiSuccess<Testimonial>>(`/testimonials/${id}/featured`, {}),
 }
 
+// ─── services (Why Choose Us) ─────────────────────────────────────────────────
+
+export interface Service {
+  id: string
+  num: string
+  title: string
+  body: string
+  icon: string
+  sortOrder: number
+  createdAt: string
+  updatedAt: string
+}
+
+export const servicesApi = {
+  list: () => get<ApiSuccess<Service[]>>('/services'),
+  get:  (id: string) => get<ApiSuccess<Service>>(`/services/${id}`),
+  create: (data: Partial<Service>) => post<ApiSuccess<Service>>('/services', data),
+  update: (id: string, data: Partial<Service>) => put<ApiSuccess<Service>>(`/services/${id}`, data),
+  delete: (id: string) => del<ApiSuccess<{}>>(`/services/${id}`),
+}
+
 // ─── settings ─────────────────────────────────────────────────────────────────
 
 export const settingsApi = {

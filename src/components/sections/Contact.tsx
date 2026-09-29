@@ -1,10 +1,20 @@
-import { useState } from 'react'
-import { messagesApi } from '../../services/api'
+import { useState, useEffect } from 'react'
+import { messagesApi, settingsApi } from '../../services/api'
 
 export default function Contact() {
   const [form, setForm]       = useState({ name: '', email: '', phone: '', subject: '', message: '' })
   const [status, setStatus]   = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [errMsg, setErrMsg]   = useState('')
+  const [settings, setSettings] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    settingsApi.list().then(res => setSettings(res.data)).catch(() => {})
+  }, [])
+
+  const phone     = settings.contact_phone    || '+254 795 308 101'
+  const email     = settings.contact_email    || 'arsarealestates@gmail.com'
+  const address   = settings.contact_address  || 'Nairobi, CBD'
+  const instagram = settings.contact_instagram|| 'https://www.instagram.com/arsarealestates'
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }))
@@ -48,10 +58,9 @@ export default function Contact() {
 
           <div className="space-y-6">
             {[
-              { label: 'Phone',       value: '+254 795 308 101',              icon: '📞', href: 'tel:+254795308101' },
-              { label: 'Email',       value: 'arsarealestates@gmail.com',  icon: '📧', href: 'arsarealestates@gmail.com' },
-              { label: 'Kenya',    value: 'Nairobi,CBD',    icon: '📍', href: '#' },
-              
+              { label: 'Phone',   value: phone,   icon: '📞', href: `tel:${phone.replace(/\s/g, '')}` },
+              { label: 'Email',   value: email,   icon: '📧', href: `mailto:${email}` },
+              { label: 'Address', value: address, icon: '📍', href: '#' },
             ].map((c) => (
               <div key={c.label} className="flex gap-4 items-start">
                 <span className="text-2xl mt-0.5">{c.icon}</span>
@@ -74,9 +83,7 @@ export default function Contact() {
             <p className="text-[#111827] text-xs tracking-widest uppercase font-semibold mb-4">Follow Us</p>
             <div className="flex gap-3">
               {[
-                
-                { name: 'Instagram', href: 'https://www.instagram.com/arsarealestates?igsi=ZDNlZDc0MzIxNw==', icon: '📷 ' },
-                
+                { name: 'Instagram', href: instagram, icon: '📷' },
               ].map((s) => (
                 <a
                   key={s.name}

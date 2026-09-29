@@ -4,11 +4,13 @@ import { PageLoader, ErrorBanner, Btn } from '../../components/admin/ui'
 import { useApi } from '../../hooks/useApi'
 
 const KEYS = [
-  { key: 'site_name',        label: 'Site Name',         type: 'text',  group: 'General' },
-  { key: 'site_description', label: 'Site Description',  type: 'text',  group: 'General' },
-  { key: 'logo_url',         label: 'Logo URL',           type: 'url',   group: 'General' },
-  { key: 'contact_email',    label: 'Contact Email',      type: 'email', group: 'Contact' },
-  { key: 'contact_phone',    label: 'Contact Phone',      type: 'text',  group: 'Contact' },
+  { key: 'site_name',          label: 'Site Name',         type: 'text',  group: 'General' },
+  { key: 'site_description',   label: 'Site Description',  type: 'text',  group: 'General' },
+  { key: 'logo_url',           label: 'Logo URL',           type: 'url',   group: 'General' },
+  { key: 'contact_email',      label: 'Contact Email',      type: 'email', group: 'Contact' },
+  { key: 'contact_phone',      label: 'Contact Phone',      type: 'text',  group: 'Contact' },
+  { key: 'contact_address',    label: 'Address',            type: 'text',  group: 'Contact' },
+  { key: 'contact_instagram',  label: 'Instagram URL',      type: 'url',   group: 'Contact' },
 ]
 
 const GROUPS = [...new Set(KEYS.map(k => k.group))]

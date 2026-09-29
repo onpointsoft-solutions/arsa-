@@ -243,3 +243,18 @@ CREATE TABLE IF NOT EXISTS newsletter_blasts (
   created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_blast_user FOREIGN KEY (sent_by) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─────────────────────────────────────────────
+-- services (Why Choose Us cards)
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS services (
+  id          VARCHAR(36)  NOT NULL PRIMARY KEY,
+  num         VARCHAR(10)  NOT NULL,
+  title       VARCHAR(255) NOT NULL,
+  body        TEXT,
+  icon        VARCHAR(20),
+  sort_order  INT          NOT NULL DEFAULT 0,
+  created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_services_sort (sort_order)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

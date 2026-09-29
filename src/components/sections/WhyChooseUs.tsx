@@ -1,6 +1,10 @@
-import { WHY_CHOOSE_US } from '../data/constants'
+import { servicesApi } from '../../services/api'
+import { useApi } from '../../hooks/useApi'
 
 export default function WhyChooseUs() {
+  const { data, loading } = useApi(() => servicesApi.list(), [])
+  const services = data?.data ?? []
+
   return (
     <section id="services" className="py-28 px-8 md:px-16 bg-white">
       {/* Section Header */}
@@ -14,33 +18,55 @@ export default function WhyChooseUs() {
         </h2>
       </div>
 
+      {/* Loading skeleton */}
+      {loading && (
+        <div className="grid md:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-[#f8faf9] border border-gray-100 rounded-xl p-8 animate-pulse">
+              <div className="w-12 h-12 rounded-lg bg-gray-200 mb-5" />
+              <div className="h-3 bg-gray-200 rounded w-8 mb-3" />
+              <div className="h-5 bg-gray-200 rounded w-3/4 mb-3" />
+              <div className="h-3 bg-gray-200 rounded w-full mb-2" />
+              <div className="h-3 bg-gray-200 rounded w-5/6" />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!loading && services.length === 0 && (
+        <p className="text-center text-gray-400 py-16">No services have been added yet.</p>
+      )}
+
       {/* Services Grid */}
-      <div className="grid md:grid-cols-3 gap-6">
-        {WHY_CHOOSE_US.map((service) => (
-          <div
-            key={service.num}
-            className="bg-[#f8faf9] border border-gray-100 rounded-xl p-8 group hover:border-[#2d6a4f]/30 hover:shadow-md transition-all duration-300"
-          >
-            {/* Icon */}
-            <div className="w-12 h-12 rounded-lg bg-[#d8f3dc] flex items-center justify-center text-xl mb-5">
-              {service.icon}
+      {!loading && services.length > 0 && (
+        <div className="grid md:grid-cols-3 gap-6">
+          {services.map((service) => (
+            <div
+              key={service.id}
+              className="bg-[#f8faf9] border border-gray-100 rounded-xl p-8 group hover:border-[#2d6a4f]/30 hover:shadow-md transition-all duration-300"
+            >
+              {/* Icon */}
+              <div className="w-12 h-12 rounded-lg bg-[#d8f3dc] flex items-center justify-center text-xl mb-5">
+                {service.icon}
+              </div>
+
+              {/* Number */}
+              <div className="text-[#2d6a4f] text-xs tracking-widest uppercase font-semibold mb-2">
+                {service.num}
+              </div>
+
+              {/* Title */}
+              <h3 className="font-display text-xl mb-3 text-[#111827] group-hover:text-[#2d6a4f] transition-colors duration-300">
+                {service.title}
+              </h3>
+
+              {/* Description */}
+              <p className="text-[#333333] text-sm leading-relaxed font-medium">{service.body}</p>
             </div>
-
-            {/* Number */}
-            <div className="text-[#2d6a4f] text-xs tracking-widest uppercase font-semibold mb-2">
-              {service.num}
-            </div>
-
-            {/* Title */}
-            <h3 className="font-display text-xl mb-3 text-[#111827] group-hover:text-[#2d6a4f] transition-colors duration-300">
-              {service.title}
-            </h3>
-
-            {/* Description */}
-            <p className="text-[#333333] text-sm leading-relaxed font-medium">{service.body}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </section>
   )
 }

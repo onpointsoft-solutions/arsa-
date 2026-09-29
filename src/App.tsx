@@ -22,6 +22,7 @@ import Messages     from './pages/admin/Messages'
 import Settings     from './pages/admin/Settings'
 import Media        from './pages/admin/Media'
 import Newsletter   from './pages/admin/Newsletter'
+import AdminServices from './pages/admin/Services'
 
 export default function App() {
   return (
@@ -64,6 +65,7 @@ export default function App() {
             <Route path="newsletter"   element={<Newsletter />} />
             <Route path="media"        element={<Media />} />
             <Route path="settings"     element={<Settings />} />
+            <Route path="services"     element={<AdminServices />} />
           </Route>
 
           {/* Catch-all */}

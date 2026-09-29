@@ -141,7 +141,7 @@ export default function FeaturedProperties() {
 
       {/* Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="rounded-xl overflow-hidden border border-gray-100 animate-pulse">
               <div className="aspect-[4/3] bg-gray-200" />
@@ -153,7 +153,7 @@ export default function FeaturedProperties() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
           {filtered.map((p) => (
             <article
               key={p.id}
@@ -184,12 +184,21 @@ export default function FeaturedProperties() {
               </div>
 
               {/* Details */}
-              <div className="bg-white px-5 py-4 flex items-center justify-between">
-                <div className="font-display text-lg text-[#2d6a4f] font-semibold">{p.price}</div>
-                <div className="flex gap-4 text-[#333] text-xs tracking-wider font-medium">
-                  <span>{p.beds} bd</span>
-                  <span>{p.baths} ba</span>
-                  <span>{p.sqft} ft²</span>
+              <div className="bg-white px-3 sm:px-5 py-3 sm:py-4">
+                <div className="font-display text-base sm:text-lg text-[#2d6a4f] font-semibold mb-2">{p.price}</div>
+                <div className="grid grid-cols-3 gap-1 text-[#333] text-[10px] sm:text-xs tracking-wider font-medium border-t border-gray-100 pt-2">
+                  <span className="flex flex-col items-center gap-0.5">
+                    <span className="text-sm">🛏</span>
+                    <span>{p.beds} bd</span>
+                  </span>
+                  <span className="flex flex-col items-center gap-0.5 border-x border-gray-100">
+                    <span className="text-sm">🚿</span>
+                    <span>{p.baths} ba</span>
+                  </span>
+                  <span className="flex flex-col items-center gap-0.5">
+                    <span className="text-sm">📐</span>
+                    <span>{p.sqft} ft²</span>
+                  </span>
                 </div>
               </div>
             </article>

@@ -340,7 +340,7 @@ export default function PropertiesPage() {
           {/* ── Results ── */}
           <div className="flex-1 min-w-0">
             {loading ? (
-              <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div className="grid grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-5">
                 {[...Array(9)].map((_, i) => (
                   <div key={i} className="rounded-xl overflow-hidden border border-gray-100 animate-pulse">
                     <div className="aspect-[4/3] bg-gray-200" />
@@ -365,7 +365,7 @@ export default function PropertiesPage() {
               </div>
             ) : (
               <>
-                <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                <div className="grid grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-5">
                   {properties.map(p => (
                     <article
                       key={p.id}
@@ -408,10 +408,19 @@ export default function PropertiesPage() {
                             {p.type}
                           </span>
                         </div>
-                        <div className="flex gap-4 text-xs text-gray-500 font-medium">
-                          <span>🛏 {p.bedrooms} bd</span>
-                          <span>🚿 {p.bathrooms} ba</span>
-                          <span>📐 {Number(p.squareFeet).toLocaleString()} ft²</span>
+                        <div className="grid grid-cols-3 gap-1 text-[10px] sm:text-xs text-gray-500 font-medium border-t border-gray-100 pt-2">
+                          <span className="flex flex-col items-center gap-0.5">
+                            <span className="text-sm">🛏</span>
+                            <span>{p.bedrooms} bd</span>
+                          </span>
+                          <span className="flex flex-col items-center gap-0.5 border-x border-gray-100">
+                            <span className="text-sm">🚿</span>
+                            <span>{p.bathrooms} ba</span>
+                          </span>
+                          <span className="flex flex-col items-center gap-0.5">
+                            <span className="text-sm">📐</span>
+                            <span>{Number(p.squareFeet).toLocaleString()} ft²</span>
+                          </span>
                         </div>
                       </div>
                     </article>

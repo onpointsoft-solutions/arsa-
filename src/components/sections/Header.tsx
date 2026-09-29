@@ -74,6 +74,12 @@ export default function Header() {
           >
             Properties
           </Link>
+          <Link
+            to="/services"
+            className="nav-link text-[#111827] hover:text-[#2d6a4f] transition-colors font-semibold text-sm"
+          >
+            Services
+          </Link>
           {NAVIGATION_MENU.map((item) => (
             <a
               key={item.label}
@@ -149,6 +155,13 @@ export default function Header() {
               className="font-display text-3xl text-[#111827] hover:text-[#2d6a4f] transition-colors"
             >
               Properties
+            </Link>
+            <Link
+              to="/services"
+              onClick={() => setMenuOpen(false)}
+              className="font-display text-3xl text-[#111827] hover:text-[#2d6a4f] transition-colors"
+            >
+              Services
             </Link>
             {NAVIGATION_MENU.map((item) => (
               <a

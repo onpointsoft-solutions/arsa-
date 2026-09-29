@@ -122,7 +122,6 @@ export const FAQ_ITEMS = [
 
 export const NAVIGATION_MENU = [
   { label: 'About',        href: '#about' },
-  { label: 'Services',     href: '#services' },
   { label: 'Testimonials', href: '#testimonials' },
   { label: 'Contact',      href: '#contact' },
 ]

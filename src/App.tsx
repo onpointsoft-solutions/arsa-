@@ -8,6 +8,7 @@ import Login        from './pages/Login'
 import HomePage     from './pages/HomePage'
 import UserProfile  from './pages/UserProfile'
 import PropertiesPage from './pages/PropertiesPage'
+import ServicesPage   from './pages/services'
 
 // Admin pages
 import AdminLayout  from './pages/admin/AdminLayout'
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="/"           element={<HomePage />} />
           <Route path="/login"      element={<Login />} />
           <Route path="/properties" element={<PropertiesPage />} />
+          <Route path="/services"   element={<ServicesPage />} />
 
           {/* User */}
           <Route

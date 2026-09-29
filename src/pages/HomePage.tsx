@@ -1,7 +1,6 @@
 import Header from '../components/sections/Header'
 import Hero from '../components/sections/Hero'
 import FeaturedProperties from '../components/sections/FeaturedProperties'
-import WhyChooseUs from '../components/sections/WhyChooseUs'
 import HowItWorks from '../components/sections/HowItWorks'
 import FeaturedLocations from '../components/sections/FeaturedLocations'
 import About from '../components/sections/About'
@@ -23,9 +22,6 @@ export default function HomePage() {
 
       {/* Featured Properties */}
       <FeaturedProperties />
-
-      {/* Why Choose Us */}
-      <WhyChooseUs />
 
       {/* CTA Banner */}
       <CTABanner />

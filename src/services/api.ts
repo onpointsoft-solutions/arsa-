@@ -102,9 +102,11 @@ export interface Property {
   categoryId: string
   locationId: string
   ownerId: string
+  agentId: string
   category?: { id: string; name: string; slug: string }
   location?: { id: string; name: string; slug: string }
   owner?: { id: string; email: string; firstName: string; lastName: string }
+  agent?: { id: string; email: string; firstName: string; lastName: string }
   createdAt: string
 }
 
@@ -267,6 +269,35 @@ export const testimonialsApi = {
   delete: (id: string) => del<ApiSuccess<{}>>(`/testimonials/${id}`),
   toggleFeatured: (id: string) =>
     patch<ApiSuccess<Testimonial>>(`/testimonials/${id}/featured`, {}),
+}
+
+// ─── agents ───────────────────────────────────────────────────────────────────
+
+export interface Agent {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  phone?: string
+  avatar?: string
+  bio?: string
+  specialization?: string
+  licenseNumber?: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export const agentsApi = {
+  list: (page = 1, limit = 50, search = '') => {
+    const params = new URLSearchParams({ page: String(page), limit: String(limit) })
+    if (search.trim()) params.set('search', search.trim())
+    return get<PaginatedResponse<Agent>>(`/agents?${params}`)
+  },
+  get:    (id: string) => get<ApiSuccess<Agent>>(`/agents/${id}`),
+  create: (data: Partial<Agent>) => post<ApiSuccess<Agent>>('/agents', data),
+  update: (id: string, data: Partial<Agent>) => put<ApiSuccess<Agent>>(`/agents/${id}`, data),
+  delete: (id: string) => del<ApiSuccess<{}>>(`/agents/${id}`),
 }
 
 // ─── services (Why Choose Us) ─────────────────────────────────────────────────

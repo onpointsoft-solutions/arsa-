@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import {
-  propertiesApi, categoriesApi, locationsApi, uploadApi,
-  Property, Category, Location,
+  propertiesApi, categoriesApi, locationsApi, uploadApi, agentsApi,
+  Property, Category, Location, Agent,
 } from '../../services/api'
 import { useApi } from '../../hooks/useApi'
 import {
@@ -18,7 +18,7 @@ const EMPTY: Partial<Property> = {
   title: '', description: '', price: 0, type: 'APARTMENT', status: 'AVAILABLE',
   address: '', city: '', state: '', zipCode: '', country: '',
   bedrooms: 1, bathrooms: 1, squareFeet: 0, thumbnail: '', images: [],
-  categoryId: '', locationId: '', featured: false,
+  categoryId: '', locationId: '', agentId: '', featured: false,
 }
 
 // ── Small gallery upload button used inside the form ──────────────────────────
@@ -73,11 +73,13 @@ export default function Properties() {
   const { data, loading, error, refetch } = useApi(
     () => propertiesApi.list({ page, limit: 10, search }), [page, search]
   )
-  const { data: cats }     = useApi(() => categoriesApi.list(1, 100), [])
-  const { data: locs }     = useApi(() => locationsApi.list(1, 100), [])
+  const { data: cats }      = useApi(() => categoriesApi.list(1, 100), [])
+  const { data: locs }      = useApi(() => locationsApi.list(1, 100), [])
+  const { data: agentsData } = useApi(() => agentsApi.list(1, 100), [])
 
-  const categories: Category[] = cats?.data     ?? []
-  const locations:  Location[] = locs?.data     ?? []
+  const categories: Category[] = cats?.data       ?? []
+  const locations:  Location[] = locs?.data       ?? []
+  const agents:     Agent[]    = agentsData?.data ?? []
 
   const openAdd = () => {
     setEditing(null)
@@ -151,7 +153,7 @@ export default function Properties() {
 
       {!loading && !error && (
         <>
-          <Table headers={['Property', 'Price', 'Type', 'Status', 'Beds/Baths', 'Actions']}>
+          <Table headers={['Property', 'Price', 'Type', 'Status', 'Beds/Baths', 'Agent', 'Actions']}>
             {(data?.data ?? []).map(p => (
               <tr key={p.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-5 py-3.5">
@@ -173,6 +175,9 @@ export default function Properties() {
                 <td className="px-5 py-3.5 text-sm text-gray-600">{p.type}</td>
                 <td className="px-5 py-3.5"><StatusBadge status={p.status} /></td>
                 <td className="px-5 py-3.5 text-sm text-gray-600">{p.bedrooms}bd / {p.bathrooms}ba</td>
+                <td className="px-5 py-3.5 text-sm text-gray-500">
+                  {p.agent ? `${p.agent.firstName} ${p.agent.lastName}` : '—'}
+                </td>
                 <td className="px-5 py-3.5">
                   <div className="flex gap-2">
                     <Btn size="sm" variant="outline" onClick={() => openEdit(p)}>Edit</Btn>
@@ -315,6 +320,16 @@ export default function Properties() {
                 <select className={inputCls} value={form.locationId ?? ''} onChange={e => set('locationId', e.target.value)} required>
                   <option value="">Select location</option>
                   {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                </select>
+              </Field>
+              <Field label="Agent" className="sm:col-span-2">
+                <select className={inputCls} value={form.agentId ?? ''} onChange={e => set('agentId', e.target.value)}>
+                  <option value="">— Assign to self (default) —</option>
+                  {agents.map(a => (
+                    <option key={a.id} value={a.id}>
+                      {a.firstName} {a.lastName} ({a.email})
+                    </option>
+                  ))}
                 </select>
               </Field>
             </div>

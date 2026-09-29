@@ -39,6 +39,7 @@ const mapProperty = (row: any) => ({
   categoryId: row.category_id,
   locationId: row.location_id,
   ownerId: row.owner_id,
+  agentId: row.agent_id,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
   category: row.category_name ? { id: row.category_id, name: row.category_name, slug: row.category_slug } : undefined,
@@ -49,6 +50,12 @@ const mapProperty = (row: any) => ({
     firstName: row.owner_first_name,
     lastName: row.owner_last_name,
   } : undefined,
+  agent: row.agent_email ? {
+    id: row.agent_id,
+    email: row.agent_email,
+    firstName: row.agent_first_name,
+    lastName: row.agent_last_name,
+  } : undefined,
 })
 
 const PROPERTY_JOIN = `
@@ -56,13 +63,15 @@ const PROPERTY_JOIN = `
   LEFT JOIN categories c  ON p.category_id = c.id
   LEFT JOIN locations  lo ON p.location_id  = lo.id
   LEFT JOIN users      u  ON p.owner_id     = u.id
+  LEFT JOIN agents     a  ON p.agent_id     = a.id
 `
 
 const PROPERTY_SELECT = `
   SELECT p.*,
     c.name  AS category_name,  c.slug AS category_slug,
     lo.name AS location_name, lo.slug AS location_slug,
-    u.email AS owner_email, u.first_name AS owner_first_name, u.last_name AS owner_last_name
+    u.email AS owner_email, u.first_name AS owner_first_name, u.last_name AS owner_last_name,
+    a.email AS agent_email, a.first_name AS agent_first_name, a.last_name AS agent_last_name
 `
 
 export const createProperty = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -72,22 +81,24 @@ export const createProperty = async (req: AuthRequest, res: Response): Promise<v
     const {
       title, description, price, type, address, city, state, zipCode, country,
       bedrooms, bathrooms, squareFeet, yearBuilt, categoryId, locationId,
-      images, thumbnail,
+      images, thumbnail, agentId,
     } = req.body
 
     const id = uuidv4()
+    // Admin can assign a specific agent from the agents table; null if none assigned
+    const resolvedAgentId = agentId || null
 
     await execute(
       `INSERT INTO properties
          (id, title, description, price, type, address, city, state, zip_code, country,
           bedrooms, bathrooms, square_feet, year_built, category_id, location_id,
-          owner_id, images, thumbnail)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          owner_id, agent_id, images, thumbnail)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id, title, description, parseFloat(price), type, address, city, state, zipCode, country,
         parseInt(bedrooms), parseInt(bathrooms), parseInt(squareFeet),
         yearBuilt ? parseInt(yearBuilt) : null,
-        categoryId, locationId, req.user.id,
+        categoryId, locationId, req.user.id, resolvedAgentId,
         JSON.stringify(images || []), thumbnail ?? null,
       ]
     )
@@ -200,7 +211,7 @@ export const updateProperty = async (req: AuthRequest, res: Response): Promise<v
     const {
       title, description, price, type, status, address, city, state, zipCode, country,
       bedrooms, bathrooms, squareFeet, yearBuilt, categoryId, locationId,
-      images, thumbnail, featured,
+      images, thumbnail, featured, agentId,
     } = req.body
 
     const sets: string[] = []
@@ -225,6 +236,7 @@ export const updateProperty = async (req: AuthRequest, res: Response): Promise<v
     if (images      !== undefined) { sets.push('images = ?');        params.push(JSON.stringify(images)) }
     if (thumbnail   !== undefined) { sets.push('thumbnail = ?');     params.push(thumbnail) }
     if (featured    !== undefined) { sets.push('featured = ?');      params.push(featured ? 1 : 0) }
+    if (agentId     !== undefined) { sets.push('agent_id = ?');      params.push(agentId) }
 
     if (sets.length === 0) throw new ValidationError('No fields to update')
 

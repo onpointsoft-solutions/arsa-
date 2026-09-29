@@ -23,6 +23,7 @@ import Settings     from './pages/admin/Settings'
 import Media        from './pages/admin/Media'
 import Newsletter   from './pages/admin/Newsletter'
 import AdminServices from './pages/admin/Services'
+import Agents        from './pages/admin/Agents'
 
 export default function App() {
   return (
@@ -57,6 +58,7 @@ export default function App() {
           >
             <Route path="dashboard"    element={<Dashboard />} />
             <Route path="properties"   element={<Properties />} />
+            <Route path="agents"       element={<Agents />} />
             <Route path="categories"   element={<Categories />} />
             <Route path="locations"    element={<Locations />} />
             <Route path="users"        element={<Users />} />

@@ -6,6 +6,7 @@ import logoImg from '../../assets/logo.jpg'
 const NAV = [
   { label: 'Dashboard',    icon: '◈',  href: '/admin/dashboard' },
   { label: 'Properties',   icon: '⌂',  href: '/admin/properties' },
+  { label: 'Agents',       icon: '👤', href: '/admin/agents' },
   { label: 'Categories',   icon: '⊞',  href: '/admin/categories' },
   { label: 'Locations',    icon: '◎',  href: '/admin/locations' },
   { label: 'Services',     icon: '✦',  href: '/admin/services' },
